@@ -54,6 +54,13 @@ web3j {
 	useNativeJavaTypes = true
 }
 
+// web3j 플러그인이 build/resources/main에 abi/bin을 출력해 processResources와
+// 같은 디렉토리를 공유하므로, Gradle이 요구하는 태스크 순서를 명시한다.
+// 플러그인이 늦게 등록하는 태스크라 matching으로 안전하게 설정한다.
+tasks.matching { it.name in ['generateContractWrappers', 'compileSolidity'] }.configureEach {
+	mustRunAfter 'processResources'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

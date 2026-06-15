@@ -14,14 +14,15 @@ spring:
         format_sql: true
     open-in-view: false
 
-# 블록체인(체인) 연동 설정 — 개발 기본값은 로컬 Anvil 기준
+# 블록체인(체인) 연동 설정 — 값은 환경변수로 주입(.env.example 참조)
 sto:
   chain:
-    rpc-url: http://127.0.0.1:8545
-    # 계좌관리기관(agent) 서명 키. 기본값은 Anvil 0번 계정(개발 전용, 운영 노출 금지)
-    agent-private-key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+    # RPC URL은 비밀이 아니므로 로컬 Anvil 기본값 허용
+    rpc-url: ${STO_CHAIN_RPC_URL:http://127.0.0.1:8545}
+    # 계좌관리기관(agent) 서명 키 — 반드시 환경변수로 주입(yml에 평문 보관 금지)
+    agent-private-key: ${STO_CHAIN_AGENT_PRIVATE_KEY:}
     # 배포 후 채워지는 SecurityToken 컨트랙트 주소
-    contract-address: ""
+    contract-address: ${STO_CHAIN_CONTRACT_ADDRESS:}
 
 logging:
   level:

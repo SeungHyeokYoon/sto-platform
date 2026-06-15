@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.15'
 	id 'io.spring.dependency-management' version '1.1.7'
+	// Foundry가 추출한 ABI/bytecode(src/main/solidity)로 컨트랙트 Java 래퍼 자동 생성
+	id 'org.web3j' version '4.12.3'
 }
 
 group = 'com.sto'
@@ -30,6 +32,26 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 컨트랙트 소스는 contracts/ 프로젝트 한 곳에서만 관리(중복 없음)
+sourceSets {
+	main {
+		solidity {
+			srcDir '../contracts/src'
+		}
+	}
+}
+
+solidity {
+	// Foundry와 동일한 solc 버전으로 고정
+	version = '0.8.28'
+}
+
+web3j {
+	// 생성될 래퍼 클래스의 패키지
+	generatedPackageName = 'com.sto.platform.chain.contracts'
+	useNativeJavaTypes = true
 }
 
 tasks.named('test') {

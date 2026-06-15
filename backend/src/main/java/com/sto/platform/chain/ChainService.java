@@ -66,6 +66,10 @@ public class ChainService {
         return call("totalSupply", token(contractAddress).totalSupply());
     }
 
+    public BigInteger maxSupply(String contractAddress) {
+        return call("maxSupply", token(contractAddress).maxSupply());
+    }
+
     public boolean isWhitelisted(String contractAddress, String account) {
         return call("whitelisted", token(contractAddress).whitelisted(account));
     }

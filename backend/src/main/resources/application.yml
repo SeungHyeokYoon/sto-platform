@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: sto-platform
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sto
+    username: sto
+    password: sto
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발 골격 단계: 엔티티 기준 스키마 자동 반영(추후 Flyway 전환 검토)
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+# 블록체인(체인) 연동 설정 — 개발 기본값은 로컬 Anvil 기준
+sto:
+  chain:
+    rpc-url: http://127.0.0.1:8545
+    # 계좌관리기관(agent) 서명 키. 기본값은 Anvil 0번 계정(개발 전용, 운영 노출 금지)
+    agent-private-key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+    # 배포 후 채워지는 SecurityToken 컨트랙트 주소
+    contract-address: ""
+
+logging:
+  level:
+    com.sto.platform: DEBUG

@@ -1,0 +1,29 @@
+# Claude Code local settings
+.claude/settings.local.json
+
+# Java / Gradle
+backend/.gradle/
+backend/build/
+backend/bin/
+*.class
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+*.local
+
+# Logs
+*.log

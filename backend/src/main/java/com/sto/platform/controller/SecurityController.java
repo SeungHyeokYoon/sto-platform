@@ -1,9 +1,11 @@
 package com.sto.platform.controller;
 
+import com.sto.platform.dto.HolderResponse;
 import com.sto.platform.dto.SecurityCreateRequest;
 import com.sto.platform.dto.SecurityResponse;
 import com.sto.platform.dto.WhitelistRequest;
 import com.sto.platform.dto.WhitelistResponse;
+import com.sto.platform.service.QueryService;
 import com.sto.platform.service.SecurityService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 /// 증권(종목) 등록·조회 API (명세 6.1).
 @RestController
@@ -18,9 +21,11 @@ import java.net.URI;
 public class SecurityController {
 
     private final SecurityService securityService;
+    private final QueryService queryService;
 
-    public SecurityController(SecurityService securityService) {
+    public SecurityController(SecurityService securityService, QueryService queryService) {
         this.securityService = securityService;
+        this.queryService = queryService;
     }
 
     @PostMapping
@@ -41,5 +46,11 @@ public class SecurityController {
     public WhitelistResponse setWhitelist(@PathVariable Long id,
                                           @Valid @RequestBody WhitelistRequest request) {
         return securityService.setWhitelist(id, request);
+    }
+
+    /// 권리자명부 조회(명세 6.1).
+    @GetMapping("/{id}/holders")
+    public List<HolderResponse> holders(@PathVariable Long id) {
+        return queryService.holders(id);
     }
 }

@@ -101,4 +101,8 @@ public class TransactionRecord {
     public void setStatus(TxStatus status) {
         this.status = status;
     }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
 }

@@ -5,5 +5,8 @@ libs = ["lib"]
 solc = "0.8.28"
 optimizer = true
 optimizer_runs = 200
+# Besu QBFT 네트워크(Berlin 포크)와 호환되도록 EVM 타깃 고정.
+# (기본 shanghai는 PUSH0 사용 → Berlin EVM에서 거부되므로 berlin으로 낮춤. Anvil도 호환.)
+evm_version = "berlin"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

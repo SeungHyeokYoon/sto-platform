@@ -1,0 +1,118 @@
+# Hyperledger Besu QBFT 멀티노드(검증자 4개) — "여러 기관 합의" 시연용.
+# 개발/테스트는 Anvil을 쓰고, 이 파일은 멀티노드 합의를 보여줄 때만 띄운다.
+#
+#   docker compose -f docker-compose.besu.yml up -d
+#   forge create ... --rpc-url http://127.0.0.1:8545      # besu1로 배포
+#   docker compose -f docker-compose.besu.yml down
+#
+# 네트워크 파일(genesis/키)은 besu/networkFiles, besu/nodes/ 에 생성돼 있다(besu/README.md 참조).
+# besu는 enode에 IP를 요구하므로 고정 IP 네트워크를 쓰고, 각 노드는 --p2p-host로 자기 IP를 광고한다.
+
+x-besu-common: &besu-common
+  image: hyperledger/besu:25.12.0
+  restart: unless-stopped
+
+networks:
+  besunet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+services:
+  besu1: # 부트노드 + RPC 노출
+    <<: *besu-common
+    container_name: sto-besu1
+    networks:
+      besunet:
+        ipv4_address: 172.28.0.11
+    volumes:
+      - ./besu/networkFiles/genesis.json:/opt/besu/genesis.json:ro
+      - ./besu/nodes/besu1/key:/opt/besu/key:ro
+    ports:
+      - "8545:8545"
+    command:
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --data-path=/opt/besu/data
+      - --p2p-host=172.28.0.11
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-port=8545
+      - --rpc-http-api=ETH,NET,WEB3,QBFT
+      - --rpc-http-cors-origins=all
+      - --host-allowlist=*
+      - --min-gas-price=0
+
+  besu2:
+    <<: *besu-common
+    container_name: sto-besu2
+    depends_on: [besu1]
+    networks:
+      besunet:
+        ipv4_address: 172.28.0.12
+    volumes:
+      - ./besu/networkFiles/genesis.json:/opt/besu/genesis.json:ro
+      - ./besu/nodes/besu2/key:/opt/besu/key:ro
+    command:
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --data-path=/opt/besu/data
+      - --p2p-host=172.28.0.12
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-port=8545
+      - --rpc-http-api=ETH,NET,WEB3,QBFT
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --bootnodes=enode://931b5ad97940eefeef903715927762ed14fa7c8239913327138a8304d109952d4f5e97769cfbe18cef8a6bfba0dcdc0c00eb93cdebafb00f218a26ba1283f7de@172.28.0.11:30303
+
+  besu3:
+    <<: *besu-common
+    container_name: sto-besu3
+    depends_on: [besu1]
+    networks:
+      besunet:
+        ipv4_address: 172.28.0.13
+    volumes:
+      - ./besu/networkFiles/genesis.json:/opt/besu/genesis.json:ro
+      - ./besu/nodes/besu3/key:/opt/besu/key:ro
+    command:
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --data-path=/opt/besu/data
+      - --p2p-host=172.28.0.13
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-port=8545
+      - --rpc-http-api=ETH,NET,WEB3,QBFT
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --bootnodes=enode://931b5ad97940eefeef903715927762ed14fa7c8239913327138a8304d109952d4f5e97769cfbe18cef8a6bfba0dcdc0c00eb93cdebafb00f218a26ba1283f7de@172.28.0.11:30303
+
+  besu4:
+    <<: *besu-common
+    container_name: sto-besu4
+    depends_on: [besu1]
+    networks:
+      besunet:
+        ipv4_address: 172.28.0.14
+    volumes:
+      - ./besu/networkFiles/genesis.json:/opt/besu/genesis.json:ro
+      - ./besu/nodes/besu4/key:/opt/besu/key:ro
+    command:
+      - --genesis-file=/opt/besu/genesis.json
+      - --node-private-key-file=/opt/besu/key
+      - --data-path=/opt/besu/data
+      - --p2p-host=172.28.0.14
+      - --p2p-port=30303
+      - --rpc-http-enabled
+      - --rpc-http-host=0.0.0.0
+      - --rpc-http-port=8545
+      - --rpc-http-api=ETH,NET,WEB3,QBFT
+      - --host-allowlist=*
+      - --min-gas-price=0
+      - --bootnodes=enode://931b5ad97940eefeef903715927762ed14fa7c8239913327138a8304d109952d4f5e97769cfbe18cef8a6bfba0dcdc0c00eb93cdebafb00f218a26ba1283f7de@172.28.0.11:30303

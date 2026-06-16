@@ -74,6 +74,11 @@ public class ChainService {
         return call("whitelisted", token(contractAddress).whitelisted(account));
     }
 
+    /// 주소별 락업 해제 시각(unix seconds). 0이면 락업 없음.
+    public BigInteger lockupUntil(String contractAddress, String account) {
+        return call("lockupUntil", token(contractAddress).lockupUntil(account));
+    }
+
     // ─── 내부 ───────────────────────────────────────────────────────
 
     private SecurityToken token(String contractAddress) {

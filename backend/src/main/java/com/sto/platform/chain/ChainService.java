@@ -79,6 +79,11 @@ public class ChainService {
         return call("lockupUntil", token(contractAddress).lockupUntil(account));
     }
 
+    /// 계좌관리기관(agent) 주소 = 미배정 물량을 보유하는 창고(treasury) 계정.
+    public String agentAddress() {
+        return credentials().getAddress();
+    }
+
     // ─── 내부 ───────────────────────────────────────────────────────
 
     private SecurityToken token(String contractAddress) {

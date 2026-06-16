@@ -255,6 +255,13 @@ private boolean applyLog(Security security, Log evlog) {              // L98
 - Anvil/Besu(QBFT)는 **즉시 finality** → reorg 비쟁점. 그래서 정합성 난이도가 "이벤트 전달 신뢰성"으로 집중된다.
 - 퍼블릭 체인이라면 N confirmations·reorg 보정이 필요(본 프로젝트엔 해당 없음, 문서로만 언급).
 
+### 4.7 멀티노드 합의 (Besu QBFT) — 구현됨
+- 개발/테스트는 Anvil(단일 노드), "여러 기관 합의" 시연은 **Besu QBFT 검증자 4개**([docker-compose.besu.yml](docker-compose.besu.yml), [besu/README.md](besu/README.md)).
+- 검증자들이 **라운드로빈으로 블록을 제안·합의**(2초 주기). 제안자가 4개 노드를 번갈아 도는 것으로 "공동 운영"을 확인할 수 있다.
+- **전환은 RPC 주소만**: `STO_CHAIN_RPC_URL`을 Anvil→Besu로. 백엔드 코드·컨트랙트 불변(web3j가 Besu에서 mint/transfer 처리 검증 완료).
+- 포크는 Berlin이라 **legacy 가스 거래**를 쓴다(foundry `evm_version=berlin`, forge 배포 시 `--legacy`). 그래서 PUSH0(Shanghai) 미사용.
+- "블록 공동 생성"과 "발행 권한 공유"는 별개: 발행은 여전히 단일 `agent`(`onlyAgent`).
+
 ---
 
 ## 5. 눈여겨볼 핵심 포인트 (평가용)
@@ -300,8 +307,10 @@ backend/src/main/java/com/sto/platform/
   dto/                         요청/응답
   error/                       전역 예외 → HTTP 매핑
 
+besu/                          ★ Besu QBFT 멀티노드: genesis·검증자 키 + README(시연 절차)
 docker-compose.yml             postgres + (통합) backend
-demo.sh                        통합 데모(전 과정 REST 시연)
+docker-compose.besu.yml        Besu QBFT 검증자 4개(멀티노드 합의 시연)
+demo.sh                        통합 데모(전 과정 REST 시연, Anvil 기반)
 README.md / docs/architecture.md / STO_claude.md(명세) / CLAUDE.md(작업지침)
 ```
 

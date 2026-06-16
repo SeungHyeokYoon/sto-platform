@@ -64,6 +64,14 @@
 Anvil/Besu(QBFT)는 즉시 finality → reorg 비쟁점. 정합성 난이도가 "이벤트 전달 신뢰성"으로 집중된다.
 (퍼블릭 체인이라면 N confirmations·reorg 보정이 필요하나 본 프로젝트엔 해당 없음.)
 
+### 멀티노드 합의 (Besu QBFT) — 구현됨
+- 개발/테스트는 Anvil(단일 노드), "여러 기관 합의" 시연은 **Besu QBFT 검증자 4개**([docker-compose.besu.yml](../docker-compose.besu.yml)).
+- QBFT는 검증자들이 **라운드로빈으로 블록을 제안·합의**(블록 주기 2초, 즉시 finality). n≥3f+1 → 1개 장애까지 견딤.
+- **백엔드 코드·컨트랙트는 동일**. 전환은 `STO_CHAIN_RPC_URL`(RPC 주소)만 Anvil→Besu로 바꾸면 된다.
+- 포크는 Berlin(EIP-1559 없음) → web3j/forge 모두 **legacy 가스 거래**로 호환(검증 완료: web3j가 Besu에서 mint/transfer 처리).
+- 주의: "여러 노드가 블록 공동 생성" ≠ "여러 기관이 발행 권한 공유". 발행 권한은 여전히 단일 `agent`(`onlyAgent`).
+  권한까지 분산하려면 컨트랙트 권한 모델(멀티 agent/멀티시그)을 별도로 바꿔야 한다. 자세히는 [besu/README.md](../besu/README.md).
+
 ## 4. 검토된 설계 결정 (트레이드오프)
 
 | 결정 | 근거 |

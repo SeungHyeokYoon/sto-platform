@@ -17,9 +17,10 @@
 
 | 계층 | 기술 |
 |---|---|
-| 스마트컨트랙트 | Solidity 0.8.28 + Foundry(forge/anvil) |
+| 스마트컨트랙트 | Solidity 0.8.28 (EVM target: berlin) + Foundry(forge/anvil) |
 | 백엔드 | Java 21 / Spring Boot 3.5 + web3j + JPA |
 | 데이터 | PostgreSQL 16 |
+| 블록체인 | Anvil(개발 단일 노드) → Hyperledger Besu QBFT(검증자 4개, 멀티노드 합의 시연) |
 | 인프라 | Docker / docker-compose |
 
 ## 디렉토리 구조
@@ -36,8 +37,10 @@ sto-platform/
 │     ├─ domain/              # JPA 엔티티/리포지토리
 │     ├─ dto/                 # 요청/응답
 │     └─ error/               # 전역 예외 처리
+├─ besu/                      # Besu QBFT 멀티노드(검증자 키·genesis) + 설명
 ├─ docker-compose.yml         # postgres + (통합 데모) backend
-├─ demo.sh                    # 통합 데모 스크립트
+├─ docker-compose.besu.yml    # Besu QBFT 검증자 4개 (멀티노드 합의 시연)
+├─ demo.sh                    # 통합 데모 스크립트(Anvil 기반)
 └─ docs/                      # 아키텍처·법제·트레이드오프
 ```
 
@@ -52,6 +55,15 @@ sto-platform/
 ```
 Anvil 기동 → 컨트랙트 배포 → 백엔드 jar 빌드 → `docker compose up`(postgres+backend) →
 발행→청약→배정→이전→자동 동기화→정합성 대사를 REST로 시연한다.
+
+### A-2. 멀티노드 합의 시연 (Besu QBFT)
+"여러 기관이 공동으로 블록을 만드는" 모습을 보려면 검증자 4개짜리 Besu QBFT 네트워크를 띄운다.
+백엔드 코드·컨트랙트는 그대로이고 **RPC 주소만** Besu로 바꾼다.
+```bash
+docker compose -f docker-compose.besu.yml up -d        # 검증자 4개
+cast block-number --rpc-url http://127.0.0.1:8545      # 블록 증가(제안자 회전) 확인
+```
+자세한 절차·배포·검증은 [besu/README.md](besu/README.md).
 
 ### B. 개발 모드 (수동)
 ```bash

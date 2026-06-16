@@ -64,3 +64,8 @@ tasks.matching { it.name in ['generateContractWrappers', 'compileSolidity'] }.co
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// 실행 가능한 bootJar만 산출(plain jar 비활성)
+tasks.named('jar') {
+	enabled = false
+}

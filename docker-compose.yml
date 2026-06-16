@@ -16,5 +16,24 @@ services:
       timeout: 5s
       retries: 5
 
+  # 최종 통합 데모용 백엔드(명세 8.3). jar는 호스트에서 bootJar로 먼저 빌드한다.
+  # 블록체인(Anvil)은 호스트 프로세스 → 컨테이너에서 host.docker.internal로 접근.
+  backend:
+    build:
+      context: ./backend
+    container_name: sto-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sto
+      STO_CHAIN_RPC_URL: ${STO_CHAIN_RPC_URL:-http://host.docker.internal:8545}
+      STO_CHAIN_AGENT_PRIVATE_KEY: ${STO_CHAIN_AGENT_PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
+      STO_CHAIN_CONTRACT_ADDRESS: ${STO_CHAIN_CONTRACT_ADDRESS:-}
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 volumes:
   sto-pgdata:

@@ -1,15 +1,21 @@
 package com.sto.platform.service;
 
 import com.sto.platform.chain.ChainService;
+import com.sto.platform.domain.Investor;
+import com.sto.platform.domain.InvestorRepository;
+import com.sto.platform.domain.KycStatus;
 import com.sto.platform.domain.Security;
 import com.sto.platform.domain.SecurityRepository;
 import com.sto.platform.dto.SecurityCreateRequest;
+import com.sto.platform.dto.WhitelistRequest;
+import com.sto.platform.dto.WhitelistResponse;
 import com.sto.platform.error.ConflictException;
 import com.sto.platform.error.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
 
@@ -21,10 +27,14 @@ public class SecurityService {
     private static final Logger log = LoggerFactory.getLogger(SecurityService.class);
 
     private final SecurityRepository securityRepository;
+    private final InvestorRepository investorRepository;
     private final ChainService chainService;
 
-    public SecurityService(SecurityRepository securityRepository, ChainService chainService) {
+    public SecurityService(SecurityRepository securityRepository,
+                           InvestorRepository investorRepository,
+                           ChainService chainService) {
         this.securityRepository = securityRepository;
+        this.investorRepository = investorRepository;
         this.chainService = chainService;
     }
 
@@ -55,6 +65,28 @@ public class SecurityService {
         log.info("증권 등록 완료 id={} symbol={} address={} maxSupply={}",
                 saved.getId(), saved.getSymbol(), address, onChainMax);
         return saved;
+    }
+
+    /// 증권별 whitelist(거래 허가) 등록/해제 → 온체인 setWhitelist.
+    /// 등록(true)은 KYC 승인 투자자만 가능. 명부에 별도 저장하지 않고 온체인 상태가 정본.
+    @Transactional
+    public WhitelistResponse setWhitelist(Long securityId, WhitelistRequest request) {
+        Security security = get(securityId);
+        Investor investor = investorRepository.findById(request.investorId())
+                .orElseThrow(() -> new NotFoundException("투자자를 찾을 수 없습니다: " + request.investorId()));
+
+        boolean status = request.statusOrDefault();
+        if (status && investor.getKycStatus() != KycStatus.APPROVED) {
+            throw new IllegalStateException("KYC 미승인 투자자는 whitelist 등록할 수 없습니다");
+        }
+
+        TransactionReceipt receipt = chainService.setWhitelist(
+                security.getContractAddress(), investor.getWalletAddress(), status);
+        log.info("whitelist {} securityId={} investorId={} tx={}",
+                status ? "등록" : "해제", securityId, investor.getId(), receipt.getTransactionHash());
+
+        return new WhitelistResponse(securityId, investor.getId(),
+                investor.getWalletAddress(), status, receipt.getTransactionHash());
     }
 
     @Transactional(readOnly = true)

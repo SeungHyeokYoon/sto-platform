@@ -2,6 +2,8 @@ package com.sto.platform.controller;
 
 import com.sto.platform.dto.SecurityCreateRequest;
 import com.sto.platform.dto.SecurityResponse;
+import com.sto.platform.dto.WhitelistRequest;
+import com.sto.platform.dto.WhitelistResponse;
 import com.sto.platform.service.SecurityService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +34,12 @@ public class SecurityController {
     @GetMapping("/{id}")
     public SecurityResponse get(@PathVariable Long id) {
         return SecurityResponse.from(securityService.get(id));
+    }
+
+    /// 증권별 whitelist(거래 허가) 등록/해제. 발행·이전의 선행 조건.
+    @PostMapping("/{id}/whitelist")
+    public WhitelistResponse setWhitelist(@PathVariable Long id,
+                                          @Valid @RequestBody WhitelistRequest request) {
+        return securityService.setWhitelist(id, request);
     }
 }
